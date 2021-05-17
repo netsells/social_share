@@ -15,7 +15,7 @@
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
     if ([@"shareInstagramPost" isEqualToString:call.method]) {
-        NSURL *urlScheme = [NSURL URLWithString:@"instagram://app"];
+        NSURL *urlScheme = [NSURL URLWithString:@"instagram://share"];
 
         if ([[UIApplication sharedApplication] canOpenURL:urlScheme]) {
             if (@available(iOS 10.0, *)) {

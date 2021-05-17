@@ -31,7 +31,26 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
-        if (call.method == "shareInstagramStory") {
+        if (call.method == "shareInstagramPost") {
+            //val stickerImage: String? = call.argument("stickerImage")
+            //val file =  File(registrar.activeContext().cacheDir,stickerImage)
+            //val stickerImageFile = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", file)
+
+            val intent = Intent("com.instagram.share.ADD_TO_FEED")
+            intent.type = "video/mp4" // TODO: Workaround to open gallery
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            //intent.putExtra(Intent.EXTRA_STREAM, stickerImageFile)
+
+            // Instantiate activity and verify it will resolve implicit intent
+            val activity: Activity = registrar.activity()
+            // activity.grantUriPermission("com.instagram.android", stickerImageFile, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            if (activity.packageManager.resolveActivity(intent, 0) != null) {
+                registrar.activeContext().startActivity(intent)
+                result.success("success")
+            } else {
+                result.success("error")
+            }
+        } else if (call.method == "shareInstagramStory") {
             //share on instagram story
             val stickerImage: String? = call.argument("stickerImage")
             val backgroundImage: String? = call.argument("backgroundImage")

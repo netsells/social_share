@@ -7,9 +7,19 @@ import 'package:path_provider/path_provider.dart';
 class SocialShare {
   static const MethodChannel _channel = const MethodChannel('social_share');
 
-  static Future<String?> shareInstagramPost() async {
-    final response = await _channel.invokeMethod('shareInstagramPost');
-    return response;
+  static Future<String?> shareInstagramPost(String imagePath) async {
+    if (Platform.isIOS) {
+      final response = await _channel.invokeMethod('shareInstagramPost');
+      return response;
+    } else if (Platform.isAndroid) {
+      final response = await _channel.invokeMethod(
+        'shareInstagramPost',
+        <String, dynamic>{
+          "stickerImage": imagePath,
+        },
+      );
+      return response;
+    }
   }
 
   static Future<String?> shareInstagramStory(
