@@ -10,8 +10,8 @@ class ShareResult {
   const ShareResult._(this.response);
 
   static const success = ShareResult._('success');
-  static const error = ShareResult._('success');
-  static const appNotFound = ShareResult._('success');
+  static const error = ShareResult._('error');
+  static const appNotFound = ShareResult._('not_found');
 
   factory ShareResult({required String? response}) {
     switch (response) {
