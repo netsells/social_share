@@ -39,7 +39,7 @@ class ShareResult {
       case ShareResult.error:
         if (error != null) return error();
         break;
-      case ShareResult.success:
+      case ShareResult.appNotFound:
         if (appNotFound != null) return appNotFound();
         break;
     }
