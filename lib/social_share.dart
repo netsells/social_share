@@ -4,13 +4,58 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
+class ShareResult {
+  final String response;
+
+  const ShareResult._(this.response);
+
+  static const success = ShareResult._('success');
+  static const error = ShareResult._('success');
+  static const appNotFound = ShareResult._('success');
+
+  factory ShareResult({required String? response}) {
+    switch (response) {
+      case 'success':
+        return ShareResult.success;
+      case 'error':
+        return ShareResult.error;
+      case 'not_found':
+        return ShareResult.appNotFound;
+      default:
+        return ShareResult.error;
+    }
+  }
+
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? success,
+    TResult Function()? error,
+    TResult Function()? appNotFound,
+    required TResult orElse(),
+  }) {
+    switch (this) {
+      case ShareResult.success:
+        if (success != null) return success();
+        break;
+      case ShareResult.error:
+        if (error != null) return error();
+        break;
+      case ShareResult.success:
+        if (appNotFound != null) return appNotFound();
+        break;
+    }
+
+    return orElse();
+  }
+}
+
 class SocialShare {
   static const MethodChannel _channel = const MethodChannel('social_share');
 
-  static Future<String?> shareInstagramPost(String imagePath) async {
+  static Future<ShareResult?> shareInstagramPost(String imagePath) async {
     if (Platform.isIOS) {
-      final response = await _channel.invokeMethod('shareInstagramPost');
-      return response;
+      final String? response =
+          await _channel.invokeMethod('shareInstagramPost');
+      return ShareResult(response: response);
     } else if (Platform.isAndroid) {
       final response = await _channel.invokeMethod(
         'shareInstagramPost',
@@ -18,11 +63,11 @@ class SocialShare {
           "stickerImage": imagePath,
         },
       );
-      return response;
+      return ShareResult(response: response);
     }
   }
 
-  static Future<String?> shareInstagramStory(
+  static Future<ShareResult?> shareInstagramStory(
     String imagePath, {
     String? backgroundTopColor,
     String? backgroundBottomColor,
@@ -73,10 +118,10 @@ class SocialShare {
       'shareInstagramStory',
       args,
     );
-    return response;
+    return ShareResult(response: response);
   }
 
-  static Future<String?> shareFacebookStory(
+  static Future<ShareResult?> shareFacebookStory(
       String imagePath,
       String backgroundTopColor,
       String backgroundBottomColor,
@@ -110,10 +155,10 @@ class SocialShare {
     }
     final String? response =
         await _channel.invokeMethod('shareFacebookStory', args);
-    return response;
+    return ShareResult(response: response);
   }
 
-  static Future<String?> shareTwitter(String captionText,
+  static Future<ShareResult?> shareTwitter(String captionText,
       {List<String>? hashtags, String? url, String? trailingText}) async {
     Map<String, dynamic> args;
     String modifiedUrl;
@@ -141,11 +186,11 @@ class SocialShare {
             (trailingText == null || trailingText.isEmpty) ? "" : trailingText
       };
     }
-    final String? version = await _channel.invokeMethod('shareTwitter', args);
-    return version;
+    final String? response = await _channel.invokeMethod('shareTwitter', args);
+    return ShareResult(response: response);
   }
 
-  static Future<String?> shareSms(String message,
+  static Future<ShareResult?> shareSms(String message,
       {String? url, String? trailingText}) async {
     Map<String, dynamic>? args;
     if (Platform.isIOS) {
@@ -165,19 +210,20 @@ class SocialShare {
         "message": message + url! + trailingText!,
       };
     }
-    final String? version = await _channel.invokeMethod('shareSms', args);
-    return version;
+    final String? response = await _channel.invokeMethod('shareSms', args);
+    return ShareResult(response: response);
   }
 
-  static Future<bool?> copyToClipboard(content) async {
+  static Future<ShareResult?> copyToClipboard(content) async {
     final Map<String, String> args = <String, String>{
       "content": content.toString()
     };
-    final bool? response = await _channel.invokeMethod('copyToClipboard', args);
-    return response;
+    final String? response =
+        await _channel.invokeMethod('copyToClipboard', args);
+    return ShareResult(response: response);
   }
 
-  static Future<bool?> shareOptions(String contentText,
+  static Future<ShareResult?> shareOptions(String contentText,
       {String? imagePath}) async {
     Map<String, dynamic> args;
     if (Platform.isIOS) {
@@ -198,14 +244,14 @@ class SocialShare {
         args = <String, dynamic>{"image": imagePath, "content": contentText};
       }
     }
-    final bool? version = await _channel.invokeMethod('shareOptions', args);
-    return version;
+    final String? response = await _channel.invokeMethod('shareOptions', args);
+    return ShareResult(response: response);
   }
 
-  static Future<String?> shareWhatsapp(String content) async {
+  static Future<ShareResult?> shareWhatsapp(String content) async {
     final Map<String, dynamic> args = <String, dynamic>{"content": content};
-    final String? version = await _channel.invokeMethod('shareWhatsapp', args);
-    return version;
+    final String? response = await _channel.invokeMethod('shareWhatsapp', args);
+    return ShareResult(response: response);
   }
 
   static Future<Map?> checkInstalledAppsForShare() async {
@@ -213,10 +259,10 @@ class SocialShare {
     return apps;
   }
 
-  static Future<String?> shareTelegram(String content) async {
+  static Future<ShareResult?> shareTelegram(String content) async {
     final Map<String, dynamic> args = <String, dynamic>{"content": content};
-    final String? version = await _channel.invokeMethod('shareTelegram', args);
-    return version;
+    final String? response = await _channel.invokeMethod('shareTelegram', args);
+    return ShareResult(response: response);
   }
 
 // static Future<String> shareSlack() async {

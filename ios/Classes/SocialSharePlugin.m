@@ -6,6 +6,10 @@
 #import "SocialSharePlugin.h"
 #include <objc/runtime.h>
 
+NSString *const ResultSuccess = @"success";
+NSString *const ResultNotFound = @"not_found";
+NSString *const ResultError = @"error";
+
 @implementation SocialSharePlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
   FlutterMethodChannel* channel = [FlutterMethodChannel methodChannelWithName:@"social_share" binaryMessenger:[registrar messenger]];
@@ -20,12 +24,12 @@
         if ([[UIApplication sharedApplication] canOpenURL:urlScheme]) {
             if (@available(iOS 10.0, *)) {
                 [[UIApplication sharedApplication] openURL:urlScheme options:@{} completionHandler:nil];
-                result(@"sharing");
+                result(ResultSuccess);
             } else {
-                result(@"this only supports iOS 10+");
+                result(ResultError);
             }
         } else {
-            result(@"not supported or no facebook installed");
+            result(ResultNotFound);
         }
     } else if ([@"shareInstagramStory" isEqualToString:call.method]) {
         //Sharing story on instagram
@@ -62,9 +66,9 @@
                  
                [[UIApplication sharedApplication] openURL:urlScheme options:@{} completionHandler:nil];
                  //if success
-                 result(@"sharing");
+                 result(ResultSuccess);
            } else {
-               result(@"this only supports iOS 10+");
+               result(ResultError);
            }
            
        } else {
@@ -87,13 +91,13 @@
                           [[UIPasteboard generalPasteboard] setItems:pasteboardItems options:pasteboardOptions];
                               
                             [[UIApplication sharedApplication] openURL:urlScheme options:@{} completionHandler:nil];
-                              result(@"sharing");
+                              result(ResultSuccess);
                         } else {
-                            result(@"this only supports iOS 10+");
+                            result(ResultError);
                         }
            }
        } else {
-           result(@"not supported or no facebook installed");
+           result(ResultNotFound);
        }
     } else if ([@"shareFacebookStory" isEqualToString:call.method]) {
         NSString *stickerImage = call.arguments[@"stickerImage"];
@@ -124,19 +128,19 @@
             [[UIPasteboard generalPasteboard] setItems:pasteboardItems options:pasteboardOptions];
 
             [[UIApplication sharedApplication] openURL:urlScheme options:@{} completionHandler:nil];
-              result(@"sharing");
+              result(ResultSuccess);
             } else {
-                result(@"this only supports iOS 10+");
+                result(ResultError);
             }
         } else {
-            result(@"not supported or no facebook installed");
+            result(ResultNotFound);
         }
     } else if ([@"copyToClipboard" isEqualToString:call.method]) {
         NSString *content = call.arguments[@"content"];
         UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
         //assigning content to pasteboard
         pasteboard.string = content;
-        result([NSNumber numberWithBool:YES]);
+        result(ResultSuccess);
     } else if ([@"shareTwitter" isEqualToString:call.method]) {
         // NSString *assetImage = call.arguments[@"assetImage"];
         NSString *captionText = call.arguments[@"captionText"];
@@ -154,9 +158,9 @@
                 NSURL *urlSchemeSend = [NSURL URLWithString:urlSchemeTwitter];
                 if (@available(iOS 10.0, *)) {
                     [[UIApplication sharedApplication] openURL:urlSchemeSend options:@{} completionHandler:nil];
-                    result(@"sharing");
+                    result(ResultSuccess);
                 } else {
-                  result(@"this only supports iOS 10+");
+                  result(ResultError);
                 }
             } else {
                 //check if trailing text equals null
@@ -170,9 +174,9 @@
                     NSURL *urlSchemeMsg = [NSURL URLWithString:urlWithLink];
                     if (@available(iOS 10.0, *)) {
                         [[UIApplication sharedApplication] openURL:urlSchemeMsg options:@{} completionHandler:nil];
-                        result(@"sharing");
+                        result(ResultSuccess);
                     } else {
-                        result(@"this only supports iOS 10+");
+                        result(ResultError);
                     }
                 } else {
                     //if trailing text is not null
@@ -184,14 +188,14 @@
                     NSURL *urlSchemeMsg = [NSURL URLWithString:finalurl];
                     if (@available(iOS 10.0, *)) {
                         [[UIApplication sharedApplication] openURL:urlSchemeMsg options:@{} completionHandler:nil];
-                        result(@"sharing");
+                        result(ResultSuccess);
                     } else {
-                        result(@"this only supports iOS 10+");
+                        result(ResultError);
                     }
                 }
             }
         } else {
-            result(@"cannot find Twitter app");
+            result(ResultNotFound);
         }
     } else if ([@"shareSms" isEqualToString:call.method]) {
         NSString *msg = call.arguments[@"message"];
@@ -210,12 +214,12 @@
             if ([[UIApplication sharedApplication] canOpenURL:urlScheme]) {
                 if (@available(iOS 10.0, *)) {
                     [[UIApplication sharedApplication] openURL:urlScheme options:@{} completionHandler:nil];
-                    result(@"sharing");
+                    result(ResultSuccess);
                 } else {
-                    result(@"this only supports iOS 10+");
+                    result(ResultError);
                 }
             } else {
-                result(@"cannot find Sms app");
+                result(ResultNotFound);
             }
         } else {
             //if it does contains a link
@@ -231,12 +235,12 @@
                 if ([[UIApplication sharedApplication] canOpenURL:urlScheme]) {
                     if (@available(iOS 10.0, *)) {
                         [[UIApplication sharedApplication] openURL:urlSchemeMsg options:@{} completionHandler:nil];
-                        result(@"sharing");
+                        result(ResultSuccess);
                     } else {
-                        result(@"this only supports iOS 10+");
+                        result(ResultError);
                     }
                 } else {
-                    result(@"cannot find Sms app");
+                    result(ResultNotFound);
                 }
             } else {
                 //if trailing text is not null
@@ -250,12 +254,12 @@
                 if ([[UIApplication sharedApplication] canOpenURL:urlScheme]) {
                     if (@available(iOS 10.0, *)) {
                         [[UIApplication sharedApplication] openURL:urlSchemeMsg options:@{} completionHandler:nil];
-                        result(@"sharing");
+                        result(ResultSuccess);
                     } else {
-                        result(@"this only supports iOS 10+");
+                        result(ResultError);
                     }
                 } else {
-                    result(@"cannot find Sms app");
+                    result(ResultNotFound);
                 }
             }
         
@@ -269,9 +273,9 @@
         NSURL * whatsappURL = [NSURL URLWithString:[urlWhats stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
         if ([[UIApplication sharedApplication] canOpenURL: whatsappURL]) {
             [[UIApplication sharedApplication] openURL: whatsappURL];
-            result(@"sharing");
+            result(ResultSuccess);
         } else {
-            result(@"cannot open whatsapp");
+            result(ResultNotFound);
         }
         result([NSNumber numberWithBool:YES]);
     } else if ([@"shareTelegram" isEqualToString:call.method]) {
@@ -280,9 +284,9 @@
         NSURL * telegramURL = [NSURL URLWithString:[urlScheme stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
         if ([[UIApplication sharedApplication] canOpenURL: telegramURL]) {
             [[UIApplication sharedApplication] openURL: telegramURL];
-            result(@"sharing");
+            result(ResultSuccess);
         } else {
-            result(@"cannot open Telegram");
+            result(ResultNotFound);
         }
         result([NSNumber numberWithBool:YES]);
     } else if ([@"shareOptions" isEqualToString:call.method]) {
@@ -295,7 +299,7 @@
             UIActivityViewController *activityVC = [[UIActivityViewController alloc] initWithActivityItems:objectsToShare applicationActivities:nil];
             UIViewController *controller =[UIApplication sharedApplication].keyWindow.rootViewController;
             [controller presentViewController:activityVC animated:YES completion:nil];
-            result([NSNumber numberWithBool:YES]);
+            result(ResultSuccess);
         } else {
             //when image file is included
             NSFileManager *fileManager = [NSFileManager defaultManager];
@@ -308,7 +312,7 @@
             UIActivityViewController *activityVC = [[UIActivityViewController alloc] initWithActivityItems:objectsToShare applicationActivities:nil];
             UIViewController *controller =[UIApplication sharedApplication].keyWindow.rootViewController;
             [controller presentViewController:activityVC animated:YES completion:nil];
-            result([NSNumber numberWithBool:YES]);
+            result(ResultSuccess);
         }
     } else if ([@"checkInstalledApps" isEqualToString:call.method]) {
         NSMutableDictionary *installedApps = [[NSMutableDictionary alloc] init];

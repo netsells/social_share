@@ -27,6 +27,10 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
             val channel = MethodChannel(registrar.messenger(), "social_share")
             channel.setMethodCallHandler(SocialSharePlugin(registrar))
         }
+
+        const val RESULT_SUCCESS = "success"
+        const val RESULT_NOT_FOUND = "not_found"
+        const val RESULT_ERROR = "error"
     }
 
     @RequiresApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -37,7 +41,7 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
             //val stickerImageFile = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", file)
 
             val intent = Intent("com.instagram.share.ADD_TO_FEED")
-            intent.type = "video/mp4" // TODO: Workaround to open gallery
+            intent.type = "image/*" 
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             //intent.putExtra(Intent.EXTRA_STREAM, stickerImageFile)
 
@@ -46,9 +50,9 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
             // activity.grantUriPermission("com.instagram.android", stickerImageFile, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             if (activity.packageManager.resolveActivity(intent, 0) != null) {
                 registrar.activeContext().startActivity(intent)
-                result.success("success")
+                result.success(RESULT_SUCCESS)
             } else {
-                result.success("error")
+                result.success(RESULT_NOT_FOUND)
             }
         } else if (call.method == "shareInstagramStory") {
             //share on instagram story
@@ -81,9 +85,9 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
             activity.grantUriPermission("com.instagram.android", stickerImageFile, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             if (activity.packageManager.resolveActivity(intent, 0) != null) {
                 registrar.activeContext().startActivity(intent)
-                result.success("success")
+                result.success(RESULT_SUCCESS)
             } else {
-                result.success("error")
+                result.success(RESULT_NOT_FOUND)
             }
         } else if (call.method == "shareFacebookStory") {
             //share on facebook story
@@ -109,9 +113,9 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
             activity.grantUriPermission("com.facebook.katana", stickerImageFile, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             if (activity.packageManager.resolveActivity(intent, 0) != null) {
                 registrar.activeContext().startActivity(intent)
-                result.success("success")
+                result.success(RESULT_SUCCESS)
             } else {
-                result.success("error")
+                result.success(RESULT_NOT_FOUND)
             }
         } else if (call.method == "shareOptions") {
             //native share options
@@ -137,7 +141,7 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
             val chooserIntent: Intent = Intent.createChooser(intent, null /* dialog title optional */)
 
             registrar.activeContext().startActivity(chooserIntent)
-            result.success(true)
+            result.success(RESULT_SUCCESS)
 
         } else if (call.method == "copyToClipboard") {
             //copies content onto the clipboard
@@ -145,7 +149,7 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
             val clipboard =registrar.context().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("", content)
             clipboard.setPrimaryClip(clip)
-            result.success(true)
+            result.success(RESULT_SUCCESS)
         } else if (call.method == "shareWhatsapp") {
             //shares content on WhatsApp
             val content: String? = call.argument("content")
@@ -155,9 +159,9 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
             whatsappIntent.putExtra(Intent.EXTRA_TEXT, content)
             try {
                 registrar.activity().startActivity(whatsappIntent)
-                result.success("true")
+                result.success(RESULT_SUCCESS)
             } catch (ex: ActivityNotFoundException) {
-                result.success("false")
+                result.success(RESULT_NOT_FOUND)
             }
         } else if (call.method == "shareSms") {
             //shares content on sms
@@ -169,9 +173,9 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
             intent.putExtra("sms_body", content)
             try {
                 registrar.activity().startActivity(intent)
-                result.success("true")
+                result.success(RESULT_SUCCESS)
             } catch (ex: ActivityNotFoundException) {
-                result.success("false")
+                result.success(RESULT_NOT_FOUND)
             }
         } else if (call.method == "shareTwitter") {
             //shares content on twitter
@@ -184,9 +188,9 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
             intent.data = Uri.parse(urlScheme)
             try {
                 registrar.activity().startActivity(intent)
-                result.success("true")
+                result.success(RESULT_SUCCESS)
             } catch (ex: ActivityNotFoundException) {
-                result.success("false")
+                result.success(RESULT_NOT_FOUND)
             }
         }
         else if (call.method == "shareTelegram") {
@@ -198,9 +202,9 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
             telegramIntent.putExtra(Intent.EXTRA_TEXT, content)
             try {
                 registrar.activity().startActivity(telegramIntent)
-                result.success("true")
+                result.success(RESULT_SUCCESS)
             } catch (ex: ActivityNotFoundException) {
-                result.success("false")
+                result.success(RESULT_NOT_FOUND)
             }
         }
         else if (call.method == "checkInstalledApps") {
